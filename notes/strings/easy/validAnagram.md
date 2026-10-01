@@ -31,16 +31,22 @@ Two strings are anagrams exactly when they contain each letter the same number o
 - **A hash map of counts** (`Map<string, number>` or `HashMap<Character, Integer>`) instead of a 26-slot array: still O(n) time, and it handles Unicode and mixed case. The cost is more overhead per character and space proportional to the number of distinct characters, not a fixed 26.
 
 ## Real-world: business scenario
-**Goods-received check in a warehouse.** A purchase order says: 10 x SKU-A, 4 x SKU-B, 6 x SKU-C. The goods arrive in boxes and get scanned in whatever order they come off the pallet. Receiving needs to know whether what was scanned matches what was ordered, regardless of order.
+**Changing a password: the new password must not be the old one in a different order.**
 
-- Add the ordered quantity per SKU, subtract each scanned item, and check whether every count is `0`. This is the same count-and-cancel idea as here, with SKUs in place of letters.
-- A non-zero count points straight at the problem: `+2` for SKU-B means two units are missing, `-1` for SKU-C means one extra arrived. This is what the Java version's `MISMATCH` log line does for letters.
+A user changes their password from `Tiger123` to `123Tiger`. It looks like a new password, but it uses exactly the same characters, just rearranged. Anyone who has seen the old one can guess it easily. A change-password form can block this:
 
-The difference from the exercise is that the alphabet is not a fixed 26, so a real system would use a map keyed by SKU.
+1. **Same password:** if `new === old`, reject it ("must be different").
+2. **Rearranged password:** if the lengths are equal and every character appears the same number of times, the new password is an anagram of the old one. This is the Valid Anagram check. Reject it ("too similar to your old password").
+
+**Why this is possible.** The change-password form asks for the *current* password first, so at that moment the app has both the old and new password as plain text in memory. After that, the system stores only a hash of the password, and a hash cannot be compared this way. This also means the check only works against the current password. For older passwords in the history, the system can only catch exact repeats, by comparing hashes.
+
+**Link to the edge case in this note.** Passwords contain uppercase letters, digits and symbols, so the 26-slot `a`-`z` array from this solution would fail (`"A"` vs `"B"` returned `true`). A real check needs a larger array (for example 256 slots for byte values) or a `Map` of counts.
+
+**Caveat.** This is one cheap rule, not a full password policy. Current guidance (for example NIST SP 800-63B) puts more weight on checking new passwords against lists of breached and common passwords than on rules like this one.
 
 ## Real-world: technical / framework use
-The underlying idea is **comparing two multisets by their counts**, which shows up in a few real places:
-- **Counting sort** uses the same count array indexed by value, in O(n + k) time where k is the range of values, and is a building block of radix sort.
-- **Python's `collections.Counter(a) == Counter(b)`** and **Guava's `Multiset.equals`** are the standard-library and library form of this check: two multisets are equal when every element has the same count.
-- **Test assertions** like AssertJ's `containsExactlyInAnyOrder` and Hamcrest's `containsInAnyOrder` check the same property, equal contents ignoring order. I'm describing what they check, not claiming they use a count array internally.
-- **Sliding-window anagram search** (find all anagrams of `p` in a longer string `s`) reuses the same count idea, adjusting counts as the window moves.
+The part worth remembering is the **count array**: when the possible keys are a small fixed set (26 letters, 10 digits, 256 byte values), an array indexed by the key replaces a hash map.
+
+- **Faster than a `HashMap`.** In Java, `HashMap<Character, Integer>` boxes every key and value into objects and hashes each key. `int[26]` indexes straight to the slot, with no boxing and no hashing. That is why the solution here uses `count[c - 'a']`.
+- **Spell checkers.** Many typos are two swapped letters (`teh` for `the`), which makes the typed word an anagram of the right one. Suggestion lists can use that signal when ranking "did you mean" candidates.
+- **Testing a sort function.** To check that `mySort(input)` is correct you need two things: the output is in order, and it has the same elements as the input (nothing lost, nothing invented). The second check is the anagram check, with counts of elements instead of letters.
