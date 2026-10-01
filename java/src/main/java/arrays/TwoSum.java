@@ -9,9 +9,14 @@ public class TwoSum {
     public static int[] solve(int[] nums, int target) {
         Map<Integer, Integer> seen = new HashMap<>(); // value -> index
         for (int i = 0; i < nums.length; i++) {
-            Integer complementIndex = seen.get(target - nums[i]);
-            if (complementIndex != null) return new int[]{complementIndex, i};
-            seen.put(nums[i], i);
+            var value = nums[i];
+            Integer complementIndex = seen.get(target - value);
+            if (complementIndex != null) { 
+                System.out.printf("FOUND  i=%d value=%d need=%d at index %d%n", i, value, target - value, complementIndex);
+                return new int[]{complementIndex, i}; 
+            }
+            seen.put(value, i);
+            System.out.printf("MISS   i=%d value=%d need=%d seen=%s%n", i, value, target - value, seen);
         }
         return new int[]{};
     }
