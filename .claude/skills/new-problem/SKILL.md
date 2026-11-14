@@ -16,8 +16,8 @@ Arguments: `$ARGUMENTS` = `<topic> <level> <name> [ts|java|both]`. `level` must 
 - If either target file already exists, stop and tell the user. Never overwrite.
 
 ## Steps
-1. If the user gave the problem signature and examples, use them. Otherwise ask once for the input/output types and 2-3 example cases. Use these as the test rows; if none are given, add one placeholder row marked `// TODO: add cases` and say so.
+1. If the user gave the problem signature and examples, use them. Otherwise ask once for the input/output types and 2-3 example cases. Use these as the test cases (TypeScript: rows; Java: one `@Test` each); if none are given, add one placeholder case marked `// TODO: add cases` and say so.
 2. Create the stub. TypeScript stub body: `throw new Error("not implemented");`. Java stub body: `throw new UnsupportedOperationException("not implemented");`. Add the comment `// Time: ?  Space: ?`.
-3. Create the test file following the existing twoSum tests under `arrays/` for style (TypeScript: `it.each`, object cases; Java: `@ParameterizedTest` + `@MethodSource`). Include empty-input and no-answer cases where they apply.
+3. Create the test file. TypeScript: follow the existing twoSum tests under `typescript/src/arrays/` (`it.each`, object cases). Java: follow `java/rules.md`, meaning one `@Test` method per case, each with a `@DisplayName`, and each test's data written inline in the method as `List.of(...)` or literals. Do not use `@ParameterizedTest`, `@MethodSource`, or any shared test-data helper class. Group cases with short comments (`// edge cases`, ...). Include empty-input and no-answer cases where they apply.
 4. Confirm the tests fail because the stub throws, not because of a compile or import error: run `npx vitest run <camelName>` in `typescript/` and/or `mvn -q test -Dtest=<PascalName>Test` in `java/`.
 5. Report the created paths and the run commands. Do not give hints unless asked.

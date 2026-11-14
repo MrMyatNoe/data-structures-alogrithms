@@ -3,27 +3,12 @@ package strings.easy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.Method;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 class ValidAnagramTest {
-
-    static Stream<Arguments> cases() {
-        return Stream.of(
-            Arguments.of("listen", "silent", true),
-            Arguments.of("anagram", "nagaram", true),
-            Arguments.of("aabb", "bbaa", true),
-            Arguments.of("a", "a", true),
-            Arguments.of("", "", true),
-            Arguments.of("rat", "car", false),
-            Arguments.of("aab", "abb", false),
-            Arguments.of("a", "ab", false)
-        );
-    }
 
     @BeforeEach
     void logHeader(TestInfo info) {
@@ -33,9 +18,57 @@ class ValidAnagramTest {
             info.getDisplayName());
     }
 
-    @ParameterizedTest(name = "s=\"{0}\" t=\"{1}\" -> {2}")
-    @MethodSource("cases")
-    void checksAnagram(String s, String t, boolean expected) {
-        assertEquals(expected, ValidAnagram.solve(s, t));
+    // anagrams
+
+    @Test
+    @DisplayName("listen and silent")
+    void listenAndSilent() {
+        assertEquals(true, ValidAnagram.solve("listen", "silent"));
+    }
+
+    @Test
+    @DisplayName("anagram and nagaram")
+    void anagramAndNagaram() {
+        assertEquals(true, ValidAnagram.solve("anagram", "nagaram"));
+    }
+
+    @Test
+    @DisplayName("repeated letters: aabb and bbaa")
+    void repeatedLetters() {
+        assertEquals(true, ValidAnagram.solve("aabb", "bbaa"));
+    }
+
+    // edge cases
+
+    @Test
+    @DisplayName("single letter, same")
+    void singleLetter() {
+        assertEquals(true, ValidAnagram.solve("a", "a"));
+    }
+
+    @Test
+    @DisplayName("both empty")
+    void bothEmpty() {
+        assertEquals(true, ValidAnagram.solve("", ""));
+    }
+
+    // not anagrams
+
+    @Test
+    @DisplayName("different letters: rat and car")
+    void differentLetters() {
+        assertEquals(false, ValidAnagram.solve("rat", "car"));
+    }
+
+    @Test
+    @DisplayName("same letters, different counts: aab and abb")
+    void differentCounts() {
+        assertEquals(false, ValidAnagram.solve("aab", "abb"));
+    }
+
+    @Test
+    @DisplayName("different lengths: a and ab")
+    void differentLengths() {
+        assertEquals(false, ValidAnagram.solve("a", "ab"));
     }
 }
